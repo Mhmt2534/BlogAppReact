@@ -1,31 +1,78 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
-import { blog } from '../models/blog';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { blog } from "../models/blog";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Typography,
+  Pagination,
+} from "@mui/material";
 
 const Home = () => {
-    const [blogs,setBlogs]=useState([]);
+  const [blogs, setBlogs] = useState<blog[]>([]);
+  const [page, setPage] = useState(1);
+  const blogsPerPage = 5; // Sayfa başına gösterilecek blog sayısı
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetch("http://localhost:5274/api/Blog/getall")
-          .then((res) => res.json())
-          .then((data) =>setBlogs(data))
-          .catch((err) => console.error("API Hatası:", err));
-      }, []);
-    
+  useEffect(() => {
+    fetch("http://localhost:5274/api/Blog/getall")
+      .then((res) => res.json())
+      .then((data) => setBlogs(data))
+      .catch((err) => console.error("API Hatası:", err));
+  }, []);
+
+  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  // Blogları sayfalama için bölüyoruz
+  const startIndex = (page - 1) * blogsPerPage;
+  const selectedBlogs = blogs.slice(startIndex, startIndex + blogsPerPage);
 
   return (
-    <div> <div className="p-6 max-w-3xl mx-auto">
-    <h1 className="text-2xl font-bold mb-4">Bloglar</h1>
-    {blogs.map((blog:blog) => (
-      <Link to={`/blog/${blog.id}`} key={blog.id} className="block border-b py-4 hover:bg-gray-100">
-        <h2 className="text-xl font-semibold">{blog.title}</h2>
-        <p className="text-gray-600">{blog.content.substring(0, 100)}...</p>
-        <span className="text-sm text-gray-400">{new Date(blog.createdTime).toLocaleDateString()}</span>
-      </Link>
-    ))}
-  </div></div>
-  )
-}
+    <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
+      {selectedBlogs.map((blog: blog) => (
+        <Card
+          key={blog.id}
+          sx={{ minWidth: 275, mb: 2, cursor: "pointer" }}
+          onClick={() => navigate(`/blog/${blog.id}`)}
+        >
+          <CardContent>
+            <Typography variant="h6" component="div">
+              {blog.title}
+            </Typography>
+            <Typography sx={{ color: "text.secondary", mb: 1.5 }}>
+              {new Date(blog.createdTime).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2">
+              {blog.content.length > 50
+                ? blog.content.substring(0, 50) + "..."
+                : blog.content}
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small" onClick={() => navigate(`/blog/${blog.id}`)}>
+              Daha Fazla Oku
+            </Button>
+          </CardActions>
+        </Card>
+      ))}
 
-export default Home
+      {/* Sayfalama Bileşeni */}
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Pagination
+          count={Math.ceil(blogs.length / blogsPerPage)}
+          page={page}
+          onChange={handleChange}
+          color="primary"
+        />
+      </Box>
+    </Box>
+  );
+};
+
+export default Home;

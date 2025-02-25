@@ -11,7 +11,7 @@ import AddBlog from './pages/AddBlog'
 
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <>

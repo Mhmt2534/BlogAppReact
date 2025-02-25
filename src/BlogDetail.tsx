@@ -9,7 +9,7 @@ const BlogDetail = () => {
 
 
   useEffect(() => {
-    fetch(`http://localhost:5274/api/Blog/getbyid?id=${id}`)
+    fetch(`http://localhost:5274/api/Blog/getbyid/${id}`)
     .then((res) => res.json())
       .then((data) => {
         setBlog(data);})
